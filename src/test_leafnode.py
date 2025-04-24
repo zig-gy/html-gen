@@ -1,6 +1,7 @@
 import unittest
 
-from leafnode import LeafNode
+from leafnode import LeafNode, text_node_to_html_node
+from textnode import TextNode, TextType
 
 class TestLeafNode(unittest.TestCase):
     def test_leaf_to_html_p(self):
@@ -18,3 +19,15 @@ class TestLeafNode(unittest.TestCase):
     def test_leaf_to_no_tag(self):
         node = LeafNode(value="Hola")
         self.assertEqual(node.to_html(), "Hola")
+        
+    def test_text(self):
+        node = TextNode("This is a text node", TextType.TEXT)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, None)
+        self.assertEqual(html_node.value, "This is a text node")
+        
+    def test_link(self):
+        node = TextNode("This is a text node", TextType.LINK, "www.hola.com")
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "a")
+        self.assertEqual(html_node.value, "This is a text node")
