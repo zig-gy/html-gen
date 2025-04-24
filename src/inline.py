@@ -11,6 +11,8 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             new_texts = node.text.split(delimiter)
             if node.text[-1] == delimiter[0]:
                 new_texts = new_texts[:-1]
+            if node.text[0] == delimiter[0]:
+                new_texts = new_texts[1:]
             for i, text in enumerate(new_texts):
                 check_even = 0
                 if node.text[0] != delimiter[0]:
