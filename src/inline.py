@@ -32,7 +32,7 @@ def extract_markdown_images(text):
     return tups
 
 def extract_markdown_links(text):
-    regex = r"\[.+?\]\(.+?\)"
+    regex = r"(?<!\!)\[.+?\]\(.+?\)"
     images = re.findall(regex, text)
     tups = []
     for image in images:

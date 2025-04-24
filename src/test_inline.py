@@ -126,3 +126,9 @@ class TestInline(unittest.TestCase):
     def test_no_image_markdown_links(self):
         matches = extract_markdown_links("hola buenas tardes")
         self.assertListEqual([], matches)
+        
+    def test_image_passed_to_link(self):
+        matches = extract_markdown_links(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([], matches)
