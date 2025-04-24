@@ -1,6 +1,6 @@
 import unittest
 
-from inline import split_nodes_delimiter, extract_markdown_images, extract_markdown_links
+from inline import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link
 from textnode import TextNode, TextType
 
 class TestInline(unittest.TestCase):
@@ -144,3 +144,162 @@ class TestInline(unittest.TestCase):
             "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png), and this is a link [link](www.hola.com)"
         )
         self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+        
+    def test_split_images(self):
+        node = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("This is text with an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode(
+                    "second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png"
+                ),
+            ],
+            new_nodes,
+        )
+        
+    def test_no_split_image(self):
+        node = TextNode("Hola", TextType.TEXT)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual([node], new_nodes)
+        
+    def test_text_after_image(self):
+        node = TextNode(
+            "This is an ![image](www.hola.com) and another ![imagey](www.chao.com) xd",
+            TextType.TEXT
+        )
+        new_nodes = split_nodes_image([node])
+        # print(new_nodes)
+        self.assertListEqual(
+            [
+                TextNode("This is an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "www.hola.com"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("imagey", TextType.IMAGE, "www.chao.com"),
+                TextNode(" xd", TextType.TEXT)
+            ],
+            new_nodes
+        )
+    
+    def test_split_links(self):
+        node = TextNode(
+            "This is a [link](www.hola.com) and another [linky](www.chao.com)",
+            TextType.TEXT
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [
+                TextNode("This is a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "www.hola.com"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("linky", TextType.LINK, "www.chao.com")
+            ],
+            new_nodes
+        )
+        
+    def test_no_split_links(self):
+        node = TextNode("Hola", TextType.TEXT)
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual([node], new_nodes)
+        
+    def test_text_after_link(self):
+        node = TextNode(
+            "This is a [link](www.hola.com) and another [linky](www.chao.com) xd",
+            TextType.TEXT
+        )
+        new_nodes = split_nodes_link([node])
+        # print(new_nodes)
+        self.assertListEqual(
+            [
+                TextNode("This is a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "www.hola.com"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("linky", TextType.LINK, "www.chao.com"),
+                TextNode(" xd", TextType.TEXT)
+            ],
+            new_nodes
+        )
+
+    def test_split_links_with_no_closing_parenthesis(self):
+        node = TextNode(
+            "This is a [link](www.hola.com and another [linky](www.chao.com)",
+            TextType.TEXT
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [
+                TextNode("This is a [link](www.hola.com and another ", TextType.TEXT),
+                TextNode("linky", TextType.LINK, "www.chao.com")
+            ],
+            new_nodes
+        )
+
+    def test_split_images_with_no_closing_parenthesis(self):
+        node = TextNode(
+            "This is an ![image](www.hola.com and another ![imagey](www.chao.com)",
+            TextType.TEXT
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("This is an ![image](www.hola.com and another ", TextType.TEXT),
+                TextNode("imagey", TextType.IMAGE, "www.chao.com")
+            ],
+            new_nodes
+        )
+
+    def test_split_links_and_images_combined(self):
+        node = TextNode(
+            "This is a [link](www.hola.com) and an ![image](www.image.com)",
+            TextType.TEXT
+        )
+        new_nodes = split_nodes_link([node])
+        new_nodes = split_nodes_image(new_nodes)
+        self.assertListEqual(
+            [
+                TextNode("This is a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "www.hola.com"),
+                TextNode(" and an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "www.image.com")
+            ],
+            new_nodes
+        )
+
+    def test_split_images_with_multiple_identical_images(self):
+        node = TextNode(
+            "This is an ![image](www.hola.com) and another ![image](www.hola.com)",
+            TextType.TEXT
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("This is an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "www.hola.com"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "www.hola.com")
+            ],
+            new_nodes
+        )
+
+    def test_split_links_with_multiple_identical_links(self):
+        node = TextNode(
+            "This is a [link](www.hola.com) and another [link](www.hola.com)",
+            TextType.TEXT
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [
+                TextNode("This is a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "www.hola.com"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "www.hola.com")
+            ],
+            new_nodes
+        )
+    
+    
