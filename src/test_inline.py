@@ -132,3 +132,15 @@ class TestInline(unittest.TestCase):
             "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
         )
         self.assertListEqual([], matches)
+        
+    def test_image_and_link_passed_to_link(self):
+        matches = extract_markdown_links(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png), and this is a link [link](www.hola.com)"
+        )
+        self.assertListEqual([("link", "www.hola.com")], matches)
+        
+    def test_image_and_link_passed_to_image(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png), and this is a link [link](www.hola.com)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
