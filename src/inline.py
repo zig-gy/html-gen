@@ -1,6 +1,7 @@
 import re
 
 from textnode import TextNode, TextType
+from leafnode import LeafNode
 
 def text_to_nodes(text):
     text_node = TextNode(text, TextType.TEXT)
