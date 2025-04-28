@@ -50,7 +50,14 @@ def markdown_to_html_node(markdown):
     return ParentNode("div",children=html_nodes)
             
             
- 
+def extract_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        type_of_block = block_to_block_type(block)
+        if type_of_block == BlockType.HEADING:
+            clean_text = block.lstrip("# ")
+            return clean_text.strip()
+
 def text_to_children(text):
     new_text = text.split("\n")
     new_text = " ".join(new_text)

@@ -1,6 +1,6 @@
 import unittest
 
-from block import markdown_to_blocks, BlockType, block_to_block_type, markdown_to_html_node
+from block import markdown_to_blocks, BlockType, block_to_block_type, markdown_to_html_node, extract_title
 
 class TestBlock(unittest.TestCase):
     def test_markdown_to_blocks(self):
@@ -252,3 +252,8 @@ This is a paragraph with **bold** text.
         node = markdown_to_html_node(md)
         html = node.to_html()
         self.assertEqual(html, "<div></div>")
+        
+    def test_extract_title(self):
+        md = "# Hola"
+        title = extract_title(md)
+        self.assertEqual(title, "Hola")
